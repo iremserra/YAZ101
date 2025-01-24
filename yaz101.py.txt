@@ -1,0 +1,33 @@
+import requests
+from difflib import get_close_matches
+
+# Dog API anahtarınızı buraya girin
+api_key = "YOUR_API_KEY"
+
+def get_dog_breed_info(breed_name):
+  """Verilen köpek ırkı adına göre bilgileri getirir."""
+  url = f"https://api.thedogapi.com/v1/breeds/search?q={breed_name}&api_key={api_key}"
+  response = requests.get(url)
+  data = response.json()
+
+  if data:
+    return data[0]
+  else:
+    # Yanlış yazılmış ırk adlarını düzeltmek için yakın eşleşmeleri bul
+    all_breeds = [breed['name'] for breed in requests.get("https://api.thedogapi.com/v1/breeds?api_key={api_key}").json()]
+    close_matches = get_close_matches(breed_name, all_breeds)
+    if close_matches:
+      print("Belki de şu ırkı demek istediniz:", close_matches[0])
+      return get_dog_breed_info(close_matches[0])
+    else:
+      print("Böyle bir köpek ırkı bulunamadı.")
+      return None
+
+# Kullanıcıdan ırk adı al
+breed_name = input("Bir köpek ırkı girin: ")
+
+# Bilgileri al ve ekranda göster
+result = get_dog_breed_info(breed_name)
+if result:
+  print(f"Irk: {result['name']}")
+  print(f"Temperament: {result['temperament']}"
